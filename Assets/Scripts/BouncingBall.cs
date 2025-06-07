@@ -9,7 +9,9 @@ public class BouncingBall
 
     public Vector3 velocity;
 
-    GameObject circleObject;
+    public GameObject circleObject;
+
+    public Animator animator;
 
     public BouncingBall(Vector3 center, float radius, Color color, Vector3 initialVelocity)
     {
@@ -21,16 +23,19 @@ public class BouncingBall
 
     public void Instantiate()
     {
-        // Create a new GameObject for the circle
+        // Create a new GameObject with the sprites "player-backward" and "player-forward"
         circleObject = new GameObject("BouncingBall");
         circleObject.transform.position = center; // Set the position of the circle
         circleObject.transform.localScale = new Vector3(radius, radius, 1); // Set the scale of the circle
 
-        // Add a SpriteRenderer component to the GameObject
         SpriteRenderer spriteRenderer = circleObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.color = color; // Set the color of the circle
-        spriteRenderer.sprite = Resources.Load<Sprite>("Images/bouncing-ball"); // Load a sprite for the circle (ensure you have a CircleSprite in Resources)
-        spriteRenderer.sortingOrder = 10; // Ensure the ball renders on top of other objects
+        spriteRenderer.sprite = Resources.Load<Sprite>("Images/player-forward_0");
+        spriteRenderer.sortingOrder = 10;
+
+        // Add Animation component to the GameObject
+        animator = circleObject.AddComponent<Animator>();
+        animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/player-animation");
+
     }
 
     public void UpdateFrame()

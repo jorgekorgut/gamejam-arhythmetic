@@ -5,6 +5,8 @@ public class GlobalHandler : MonoBehaviour
     public static GlobalHandler Instance { get; private set; }
     public SceneHandler sceneHandler;
 
+    public AnimationHandler animationHandler;
+
     public Camera mainCamera;
 
     [HideInInspector]
@@ -31,6 +33,7 @@ public class GlobalHandler : MonoBehaviour
     void Start()
     {
         sceneHandler = new SceneHandler();
+        animationHandler = new AnimationHandler();
         mainCamera = Camera.main; // Get the main camera
     }
 
@@ -49,6 +52,7 @@ public class GlobalHandler : MonoBehaviour
     void UpdateFrame()
     {
         sceneHandler.UpdateFrame();
+        animationHandler.UpdateFrame();
     }
 
     public void OnGameOver()
