@@ -5,6 +5,22 @@ public class Controller : MonoBehaviour
 {
     private float horizontalInput = 0;
 
+    public static Controller Instance { get; private set; }
+
+    private void Awake()
+    {
+        // Ensure only one instance of Controller exists
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // Keep this object across scenes
+        }
+        else
+        {
+            Destroy(gameObject); // Destroy duplicate instance
+        }
+    }
+
     public void Move(CallbackContext context)
     {
         if (context.performed)
@@ -17,16 +33,13 @@ public class Controller : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    public bool IsRotateRight()
     {
-        if (horizontalInput > 0)
-        {
-            GlobalHandler.Instance.sceneHandler.circlesRing.RotateRight();
-        }
-        else if (horizontalInput < 0)
-        {
-            GlobalHandler.Instance.sceneHandler.circlesRing.RotateLeft();
-        }
+        return horizontalInput > 0;
     }
-    
+
+    public bool IsRotateLeft()
+    {
+        return horizontalInput < 0;
+    }
 }
