@@ -51,9 +51,18 @@ public class CirclesRing
             {
                 if (IsActive)
                 {
-                    GlobalHandler.Instance.musicHandler.PlayTrack(circle.audioTrack1, circle.audioTrack1Volume, circle.audioTrack1Duration);
-                    GlobalHandler.Instance.musicHandler.PlayTrack(circle.audioTrack2, circle.audioTrack2Volume, circle.audioTrack2Duration);
-                    GlobalHandler.Instance.musicHandler.PlayTrack(circle.audioTrack3, circle.audioTrack3Volume, circle.audioTrack3Duration);
+                    if (circle.isHit)
+                    {
+                        GlobalHandler.Instance.musicHandler.PlayTrack(circle.audioTrack1, circle.audioTrack1Volume, circle.audioTrack1Duration);
+                        GlobalHandler.Instance.musicHandler.PlayTrack(circle.audioTrack2, circle.audioTrack2Volume, circle.audioTrack2Duration);
+                        GlobalHandler.Instance.musicHandler.PlayTrack(circle.audioTrack3, circle.audioTrack3Volume, circle.audioTrack3Duration);
+
+                    }
+
+                    if (!circle.isHit && circle.isSpecial)
+                    {
+                        GlobalHandler.Instance.animationHandler.InstanciateSparklingEffect(parentObject.transform, circle.circleObject.transform.position, circle.color, 1f);
+                    }
                     lastTimePlayed = Time.time; // Update the last time an audio track was played
                 }
             }
@@ -112,6 +121,25 @@ public class CirclesRing
         }
     }
 
+    public void OuterTheCirclesAndFade(int radius, float fadeStrength)
+    {
+        // Move the circles outward and fade them
+        foreach (Circle circle in circles)
+        {
+            if (!circle.isActive) continue;
+
+            Vector3 toCenter = parentObject.transform.position - circle.circleObject.transform.position;
+            toCenter.Normalize();
+
+            Vector3 position = circle.circleObject.transform.position - toCenter * radius;
+            circle.circleObject.transform.position = position;
+
+            Color color = circle.color;
+            color.a -= fadeStrength;
+            circle.SetColor(color);
+        }
+    }
+
     public void RotateLeft()
     {
         rotatingAngle -= rotatingAngleSpeed; // Decrease the angle for left rotation
@@ -133,17 +161,26 @@ public class CirclesRing
     public Circle CheckCollision(Vector3 position)
     {
         // Check if the position is within the bounds of any circle in the ring
+        var sortedCollisions = new List<(float distance, Circle circle)>();
+        
         foreach (Circle circle in circles)
         {
-            if (!circle.isActive) continue; // Skip inactive circles
+            if (!circle.isActive) continue;
 
             float distance = Vector3.Distance(circle.circleObject.transform.position, position);
-            if (distance <= circle.radius)
+            if (distance <= circle.radius * 1.4f) 
             {
-                return circle; // Return the first circle that collides with the position
+            sortedCollisions.Add((distance - circle.radius, circle));
             }
         }
-        return null; // No collision found
+
+        if (sortedCollisions.Count > 0)
+        {
+            sortedCollisions.Sort((a, b) => a.distance.CompareTo(b.distance));
+            return sortedCollisions[0].circle;
+        }
+        
+        return null;
     }
 }
 

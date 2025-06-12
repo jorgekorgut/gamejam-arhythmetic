@@ -13,12 +13,24 @@ public class BouncingBall
 
     public Animator animator;
 
+    public bool isPaused = false;
+
     public BouncingBall(Vector3 center, float radius, Color color, Vector3 initialVelocity)
     {
         this.center = center;
         this.radius = radius;
         this.color = color;
         this.velocity = initialVelocity;
+    }
+
+    public void Pause()
+    {
+        isPaused = true;
+    }
+
+    public void Resume()
+    {
+        isPaused = false;
     }
 
     public void Instantiate()
@@ -40,6 +52,8 @@ public class BouncingBall
 
     public void UpdateFrame()
     {
+        if (isPaused)
+            return;
         // Update the position of the ball based on its velocity
         center += velocity * GlobalHandler.Instance.deltaTime;
 
@@ -63,6 +77,9 @@ public class BouncingBall
 
     void BallCollided()
     {
+        if(isPaused)
+            return;
+
         GlobalHandler.Instance.sceneHandler.onBallCollided();
     }
 }

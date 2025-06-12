@@ -200,19 +200,19 @@ public class MusicHandler
                 // Transform into clockwise order
                 int currentPolygonPositionClockWise = currentPolygonPosition;
 
-                circlesRing.circles[currentPolygonPositionClockWise].isSpecial = true; // Mark the circles in the current polygon as special
-                circlesRing.circles[currentPolygonPositionClockWise].SetColor(Globals.ColorList[i]); // Set the color of the circles in the current polygon
-                circlesRing.circles[currentPolygonPositionClockWise].audioTrack1 = currentRingTracks[0]; // Assign the first audio track to the circle
-                circlesRing.circles[currentPolygonPositionClockWise].audioTrack2 = currentRingTracks[1]; // Assign the second audio track to the circle
-                circlesRing.circles[currentPolygonPositionClockWise].audioTrack3 = currentRingTracks[2]; // Assign the third audio track to the circle
+                circlesRing.circles[currentPolygonPositionClockWise].SetSpecial(); 
+                circlesRing.circles[currentPolygonPositionClockWise].SetColor(Globals.ColorList[i]);
+                circlesRing.circles[currentPolygonPositionClockWise].audioTrack1 = currentRingTracks[0]; 
+                circlesRing.circles[currentPolygonPositionClockWise].audioTrack2 = currentRingTracks[1]; 
+                circlesRing.circles[currentPolygonPositionClockWise].audioTrack3 = currentRingTracks[2];
 
-                circlesRing.circles[currentPolygonPositionClockWise].audioTrack1Duration = currentRingDuration[0]; // Assign the first audio track duration to the circle
-                circlesRing.circles[currentPolygonPositionClockWise].audioTrack2Duration = currentRingDuration[1]; // Assign the second audio track duration to the circle
-                circlesRing.circles[currentPolygonPositionClockWise].audioTrack3Duration = currentRingDuration[2]; // Assign the third audio track duration to the circle
+                circlesRing.circles[currentPolygonPositionClockWise].audioTrack1Duration = currentRingDuration[0]; 
+                circlesRing.circles[currentPolygonPositionClockWise].audioTrack2Duration = currentRingDuration[1]; 
+                circlesRing.circles[currentPolygonPositionClockWise].audioTrack3Duration = currentRingDuration[2]; 
 
-                circlesRing.circles[currentPolygonPositionClockWise].audioTrack1Volume = currentRingVolume[0]; // Assign the first audio track volume to the circle
-                circlesRing.circles[currentPolygonPositionClockWise].audioTrack2Volume = currentRingVolume[1]; // Assign the second audio track volume to the circle
-                circlesRing.circles[currentPolygonPositionClockWise].audioTrack3Volume = currentRingVolume[2]; // Assign the third audio track volume to the circle
+                circlesRing.circles[currentPolygonPositionClockWise].audioTrack1Volume = currentRingVolume[0]; 
+                circlesRing.circles[currentPolygonPositionClockWise].audioTrack2Volume = currentRingVolume[1]; 
+                circlesRing.circles[currentPolygonPositionClockWise].audioTrack3Volume = currentRingVolume[2]; 
             }
         }
 
@@ -221,12 +221,11 @@ public class MusicHandler
         //circlesRingList[2].Activate();
         //circlesRingList[3].Activate();
         //circlesRingList[4].Activate();
-        //circlesRingList[5].Activate(); // Activate the first and last circles ring
+        //circlesRingList[5].Activate(); 
     }
 
     public void PlayTrack(string track, float volume, float durationSeconds)
     {
-
         if (track == null)
         {
             return;

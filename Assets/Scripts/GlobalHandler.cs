@@ -5,7 +5,6 @@ public class GlobalHandler : MonoBehaviour
 {
     public static GlobalHandler Instance { get; private set; }
     public SceneHandler sceneHandler;
-
     public AnimationHandler animationHandler;
     public MusicHandler musicHandler;
 
@@ -71,6 +70,7 @@ public class GlobalHandler : MonoBehaviour
 
     public void OnGameStart()
     {
+        sceneHandler.RestorePlayerControlls(); // Restore player controls
         sceneHandler.LoadMusic1();
         StartScreen.SetActive(false); // Hide the start screen when the game starts
     }
@@ -96,9 +96,23 @@ public class GlobalHandler : MonoBehaviour
         //musicHandler.ResumeAllTracks(); // Resume all music tracks
     }
 
+    public void OnGameWin()
+    {
+        // Handle game win logic
+        Debug.Log("Game Won!"); // Placeholder for game win logic
+                                // You can add code to show a win screen or transition to the next level here
+
+        sceneHandler.RemovePlayerControlls();
+        musicHandler.PlayTrack("Win_Sound", 0.5f, 4.0f);
+        
+        sceneHandler.LoadNextLevel();
+    }
+
     public void OnGameOver()
     {
-
+        sceneHandler.RemovePlayerControlls();
+        sceneHandler.Reset();
+        StartScreen.SetActive(true);
     }
 
 }

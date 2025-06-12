@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SceneHandler
 {
+    public int currentLevel = 0;
     public float currentClockAngle = 0f; // Current angle for the clock pointer
 
     public CollisionCircle collisionCircle;
@@ -13,17 +14,71 @@ public class SceneHandler
     public List<CirclesRing> circlesRingList;
 
     public float loopDurationSeconds = 2.8f;
+
+    public int currentRingIndex = 0; // Index of the currently active circles ring
     private float rotatingAngleSpeed = 2f;
 
-
-    private int maxMissedCircles = 3; // Maximum number of missed circles before game over
+    private int maxMissedCircles = 1; // Maximum number of missed circles before game over
     private int missedCirclesCount = 0; // Count of missed circles
 
     private GameObject clockPointer;
     private GameObject roomParentObject;
+    
+    private bool ignorePlayerControls = false; // Flag to ignore player controls
     public SceneHandler()
     {
-        
+
+    }
+
+    public void LoadNextLevel()
+    {
+        currentLevel += 1; // Increment the level
+
+        if (currentLevel == 1)
+        {
+            GlobalHandler.Instance.OnGameOver();
+        }
+    }
+
+    public void DestroyLevel()
+    {
+        if (bouncingBall != null)
+        {
+            Object.Destroy(bouncingBall.circleObject); // Destroy the bouncing ball object
+            bouncingBall = null; // Clear the reference
+        }
+
+        if (collisionCircle != null)
+        {
+            Object.Destroy(collisionCircle.gameObject); // Destroy the collision circle
+            collisionCircle = null; // Clear the reference
+        }
+
+        if (circlesRingList != null)
+        {
+            foreach (CirclesRing ring in circlesRingList)
+            {
+                ring.Destroy(); // Destroy each circles ring
+            }
+            circlesRingList.Clear(); // Clear the list of circles rings
+        }
+
+        if (clockPointer != null)
+        {
+            Object.Destroy(clockPointer); // Destroy the clock pointer object
+            clockPointer = null; // Clear the reference
+        }
+
+        currentClockAngle = 0f; // Reset the clock angle
+        currentRingIndex = 0; // Reset the current ring index
+        missedCirclesCount = 0; // Reset the missed circles count
+    }
+
+    public void Reset()
+    {
+        DestroyLevel(); // Destroy the current level objects
+
+        currentLevel = 0;
     }
 
     public void LoadMusic1()
@@ -45,19 +100,19 @@ public class SceneHandler
         CirclesRing firstRing = CreateCirclesRing(2, 30, 36);
         //firstRing.Activate(); // Activate the circles ring to make it ready for interaction
 
-        CirclesRing secondRing = CreateCirclesRing(2, 35, 36);
+        CirclesRing secondRing = CreateCirclesRing(2, 30, 36);
         //secondRing.Activate(); // Activate the second circles ring
 
-        CirclesRing thirdRing = CreateCirclesRing(2, 40, 36);
+        CirclesRing thirdRing = CreateCirclesRing(2, 30, 36);
         //thirdRing.Activate(); // Activate the third circles ring
 
-        CirclesRing fourthRing = CreateCirclesRing(2, 45, 36);
+        CirclesRing fourthRing = CreateCirclesRing(2, 30, 36);
         //fourthRing.Activate(); // Activate the fourth circles ring
 
-        CirclesRing fifthRing = CreateCirclesRing(2, 50, 36);
+        CirclesRing fifthRing = CreateCirclesRing(2, 30, 36);
         //fifthRing.Activate(); // Activate the fifth circles ring
 
-        CirclesRing sixthRing = CreateCirclesRing(2, 55, 36);
+        CirclesRing sixthRing = CreateCirclesRing(2, 30, 36);
         //sixthRing.Activate(); // Activate the sixth circles ring
 
 
@@ -69,6 +124,22 @@ public class SceneHandler
         circlesRingList.Add(sixthRing);
 
         GlobalHandler.Instance.musicHandler.LoadFirstRingMusic1(circlesRingList); // Load the first music track for the circles ring
+    }
+
+    public void RemovePlayerControlls()
+    {
+        ignorePlayerControls = true; // Set the flag to ignore player controls
+        bouncingBall.Pause();
+    }
+
+    public void RestorePlayerControlls()
+    {
+        ignorePlayerControls = false; // Reset the flag to allow player controls
+
+        if(bouncingBall != null)
+        {
+            bouncingBall.Resume(); // Resume the bouncing ball
+        }
     }
 
     private void CreateBouncingBall()
@@ -164,11 +235,35 @@ public class SceneHandler
 
         Vector3 collisionPosition = collisionCircle.center - toCenter.normalized * collisionCircle.radius;
 
-        Circle collidedCircle = circlesRingList[0].CheckCollision(collisionPosition);
+        Circle collidedCircle = circlesRingList[currentRingIndex].CheckCollision(collisionPosition);
 
         if (collidedCircle != null)
         {
             onRingCircleColided(collidedCircle); // Call the method to handle the collision with the circle
+
+            bool circleRingFinished = true;
+            foreach (Circle circle in circlesRingList[currentRingIndex].circles)
+            {
+                if (circle.isSpecial && !circle.isHit)
+                {
+                    circleRingFinished = false; // If any special circle is not hit, the ring is not finished
+                    break;
+                }
+            }
+
+            if (circleRingFinished)
+            {
+                currentRingIndex += 1;
+
+                if (currentRingIndex >= circlesRingList.Count)
+                {
+                    GlobalHandler.Instance.OnGameWin(); // Trigger game win if all rings are finished
+                }
+                else
+                {
+                    onRingCircleFinished();
+                }
+            }
         }
         else
         {
@@ -176,12 +271,21 @@ public class SceneHandler
         }
     }
 
+    public void onRingCircleFinished()
+    {
+        for (int i = 0; i < currentRingIndex; i++)
+        {
+            circlesRingList[i].OuterTheCirclesAndFade(5, 0.3f);
+            //circlesRingList[i].Deactivate(); // Deactivate all previous circles rings
+        }
+        circlesRingList[currentRingIndex].Activate(); // Activate the next circles ring
+    }
+
     public void onRingCircleColided(Circle circle)
     {
         if (circle.isSpecial)
         {
-            // Change the color of the collided circle
-            circle.SetColor(new Color(Random.value, Random.value, Random.value, 1f));
+            circle.Hit(); // Call the Hit method to change the color and mark as hit
             circle.circleObject.GetComponent<SpriteRenderer>().color = circle.color; // Update the color in the SpriteRenderer
         }
         else
@@ -201,15 +305,25 @@ public class SceneHandler
 
     public void RotateLeft()
     {
+        if (ignorePlayerControls)
+        {
+            return; // Ignore player controls if the flag is set
+        }
+
         foreach (CirclesRing circlesRing in circlesRingList)
         {
-           circlesRing.RotateLeft(); // Rotate the circles ring to the left
+            circlesRing.RotateLeft(); // Rotate the circles ring to the left
         }
         currentClockAngle += rotatingAngleSpeed; // Rotate the clock pointer to the left
     }
 
     public void RotateRight()
     {
+        if (ignorePlayerControls)
+        {
+            return; // Ignore player controls if the flag is set
+        }
+
         foreach (CirclesRing circlesRing in circlesRingList)
         {
             circlesRing.RotateRight(); // Rotate the circles ring to the right

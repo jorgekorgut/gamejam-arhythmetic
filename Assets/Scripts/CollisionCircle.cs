@@ -31,40 +31,6 @@ public class CollisionCircle
         {
             Debug.LogError("ClockPointer prefab not found in Resources/Prefabs.");
         }
-
-        // // // Get max number of splitted sprites in a resource
-        // Sprite[] roomFurnitures = Resources.LoadAll<Sprite>("Images/room-furniture");
-
-        // // Get the number of sprites in the room furniture sprite sheet
-        // int furnitureSpriteCount = roomFurnitures.Length -1;
-
-        // List<Vector3> furniturePositions = new List<Vector3>(); // List to store furniture positions
-
-        // // Ranndomly populate the circle with the furniture sprites
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     // Get A random number between 1 and 5 for furniture sprite selection
-        //     int furnitureSpriteIndex = Random.Range(0, furnitureSpriteCount); // Assuming you have 5 different furniture sprites named "room-furniture_1", "room-furniture_2", etc.
-
-        //     Vector3 furniturePosition = center + Random.insideUnitSphere * radius * 0.8f; // Place furniture inside the circle
-
-        //     // Ensure furniture position is not too close to the center and not overlapping with existing furniture
-        //     while (furniturePositions.Exists(pos => Vector3.Distance(pos, furniturePosition) < 0.5f))
-        //     {
-        //         furniturePosition = center + Random.insideUnitSphere * radius * 0.8f; // Recalculate position
-        //     }
-
-        //     GameObject furniture = new GameObject("Furniture" + i);
-        //     furniture.transform.position = furniturePosition; // Place furniture inside the circle
-        //     furniture.transform.localScale = Vector3.one; // Scale down the furniture
-        //     SpriteRenderer furnitureRenderer = furniture.AddComponent<SpriteRenderer>();
-
-        //     furnitureRenderer.sprite = roomFurnitures[furnitureSpriteIndex]; // Load a sprite for the furniture (ensure you have a FurnitureSprite in Resources)
-        //     furnitureRenderer.sortingOrder = 1; // Set a higher sorting order for the furniture
-        //     furniture.transform.parent = gameObject.transform; // Set the parent of the furniture to the circle
-
-        //     furniturePositions.Add(furniture.transform.position); // Store the position of the furniture
-        // }
     }
 
     public void Rotate(float angle)
