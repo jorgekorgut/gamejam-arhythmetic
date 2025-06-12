@@ -16,15 +16,15 @@ public class SceneHandler
     public float loopDurationSeconds = 2.8f;
 
     public int currentRingIndex = 0; // Index of the currently active circles ring
-    private float rotatingAngleSpeed = 2f;
+    private float rotatingAngleSpeed = 1f;
 
     private int maxMissedCircles = 1; // Maximum number of missed circles before game over
     private int missedCirclesCount = 0; // Count of missed circles
 
     private GameObject clockPointer;
-    private GameObject roomParentObject;
     
     private bool ignorePlayerControls = false; // Flag to ignore player controls
+
     public SceneHandler()
     {
 
@@ -36,7 +36,7 @@ public class SceneHandler
 
         if (currentLevel == 1)
         {
-            GlobalHandler.Instance.OnGameOver();
+            GlobalHandler.Instance.OnGameFinished();
         }
     }
 
@@ -273,6 +273,19 @@ public class SceneHandler
 
     public void onRingCircleFinished()
     {
+        List<Vector3> circlePositions = new List<Vector3>();
+        Color circleColor = Color.white; // Default color for circles
+        foreach (Circle circle in circlesRingList[currentRingIndex-1].circles)
+        {
+            if (circle.isSpecial)
+            {
+                circlePositions.Add(circle.circleObject.transform.position); // Collect positions of special circles
+                circleColor =circle.color; // Collect colors of special circles
+            }
+        }
+        
+        GlobalHandler.Instance.animationHandler.InstanciatePolygonAnimation(circlePositions, circleColor, 2.2f); // Create polygon animation for special circles
+
         for (int i = 0; i < currentRingIndex; i++)
         {
             circlesRingList[i].OuterTheCirclesAndFade(5, 0.3f);

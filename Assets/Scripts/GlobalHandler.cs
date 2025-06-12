@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,10 +12,18 @@ public class GlobalHandler : MonoBehaviour
     public Camera mainCamera;
 
     public GameObject StartScreen;
-
     public Button startButton;
     public Button exitButton;
 
+    public GameObject SetupScreen;
+    public Button nextSetupButton;
+
+    public GameObject TutorialScreen;
+
+    public GameObject GameOverScreen;
+    public Button nextTutorialButton;
+
+    // Slider values
     [HideInInspector]
     public float deltaTime;
 
@@ -46,6 +55,13 @@ public class GlobalHandler : MonoBehaviour
         // Link buttons to their respective methods
         startButton.onClick.AddListener(OnGameStart);
         exitButton.onClick.AddListener(OnGameExit);
+
+        nextSetupButton.onClick.AddListener(OnGameNextSetup);
+        nextTutorialButton.onClick.AddListener(OnGameNextTutorial);
+
+        StartScreen.SetActive(true); // Show the start screen at the beginning
+        SetupScreen.SetActive(false); // Hide the setup screen initially
+        TutorialScreen.SetActive(false); // Hide the tutorial screen initially
     }
 
     void Update()
@@ -70,9 +86,10 @@ public class GlobalHandler : MonoBehaviour
 
     public void OnGameStart()
     {
-        sceneHandler.RestorePlayerControlls(); // Restore player controls
-        sceneHandler.LoadMusic1();
         StartScreen.SetActive(false); // Hide the start screen when the game starts
+        SetupScreen.SetActive(true); // Show the setup screen
+        TutorialScreen.SetActive(false); // Hide the tutorial screen
+        GameOverScreen.SetActive(false); 
     }
 
     public void OnGameExit()
@@ -104,15 +121,51 @@ public class GlobalHandler : MonoBehaviour
 
         sceneHandler.RemovePlayerControlls();
         musicHandler.PlayTrack("Win_Sound", 0.5f, 4.0f);
-        
-        sceneHandler.LoadNextLevel();
+
+        StartCoroutine(GameOverDelay());
+
+        IEnumerator GameOverDelay()
+        {
+            yield return new WaitForSeconds(4f);
+            sceneHandler.LoadNextLevel();
+        }
+    }
+
+    public void OnGameNextSetup()
+    {
+        StartScreen.SetActive(false); // Hide the start screen when the game starts
+        SetupScreen.SetActive(false); // Show the setup screen
+        TutorialScreen.SetActive(true); // Hide the tutorial screen
+        GameOverScreen.SetActive(false); 
+    }
+
+    public void OnGameNextTutorial()
+    {
+        sceneHandler.RestorePlayerControlls(); // Restore player controls
+        sceneHandler.LoadMusic1();
+        StartScreen.SetActive(false); // Hide the start screen when the game starts
+        SetupScreen.SetActive(false); // Hide the setup screen
+        TutorialScreen.SetActive(false); // Hide the tutorial screen
+        GameOverScreen.SetActive(false); 
+    }
+
+    public void OnGameFinished()
+    {
+        sceneHandler.RemovePlayerControlls();
+        StartCoroutine(GameOverDelay());
+
+        IEnumerator GameOverDelay()
+        {
+            yield return new WaitForSeconds(4f);
+            sceneHandler.Reset();
+            GameOverScreen.SetActive(false);
+            StartScreen.SetActive(true);
+        }
     }
 
     public void OnGameOver()
     {
-        sceneHandler.RemovePlayerControlls();
-        sceneHandler.Reset();
-        StartScreen.SetActive(true);
+        GameOverScreen.SetActive(true); // Show the game over screen
+        OnGameFinished();
     }
-
 }

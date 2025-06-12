@@ -1,7 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class AnimationHandler
 {
+    private LineRenderer polygonRenderer;
+    public AnimationHandler()
+    {
+        GameObject polygonObject = new GameObject("PolygonAnimation");
+        polygonRenderer = polygonObject.AddComponent<LineRenderer>();
+    }
     // Update is called once per frame
     public void UpdateFrame()
     {
@@ -43,6 +50,53 @@ public class AnimationHandler
         }
     }
 
+    public void InstanciatePolygonAnimation(List<Vector3> position, Color color, float duration)
+    {
+
+        // Get material
+        Material material = Resources.Load<Material>("Materials/glow-material");
+
+        polygonRenderer.positionCount = position.Count;
+        polygonRenderer.SetPositions(position.ToArray());
+        polygonRenderer.startColor = color;
+        polygonRenderer.endColor = color;
+        polygonRenderer.startWidth = 3f;
+        polygonRenderer.endWidth = 3f;
+        polygonRenderer.enabled = true;
+        polygonRenderer.sortingOrder = 100;
+        polygonRenderer.loop = true;
+
+        polygonRenderer.material = material; // Set the material to the LineRenderer
+
+        // Make it fill the polygon
+
+        GlobalHandler.Instance.StartCoroutine(FadeOutPolygon(polygonRenderer, duration));
+    }
+
+    private System.Collections.IEnumerator FadeOutPolygon(LineRenderer lineRenderer, float duration)
+    {
+        float elapsedTime = 0f;
+        Color initialColor = lineRenderer.startColor;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(initialColor.a, 0f, elapsedTime / duration);
+            if (lineRenderer == null)
+            {
+                yield break; // Exit if the lineRenderer is destroyed
+            }
+            lineRenderer.startColor = new Color(initialColor.r, initialColor.g, initialColor.b, alpha);
+            lineRenderer.endColor = new Color(initialColor.r, initialColor.g, initialColor.b, alpha);
+            yield return null;
+        }
+
+        // Ensure the final color is fully transparent
+        lineRenderer.startColor = new Color(initialColor.r, initialColor.g, initialColor.b, 0f);
+        lineRenderer.endColor = new Color(initialColor.r, initialColor.g, initialColor.b, 0f);
+        lineRenderer.enabled = false; // Disable the LineRenderer after fading out
+    }
+
     private System.Collections.IEnumerator FadeOutEffect(SpriteRenderer spriteRenderer, float duration)
     {
         float elapsedTime = 0f;
@@ -52,7 +106,7 @@ public class AnimationHandler
         {
             elapsedTime += Time.deltaTime;
             float alpha = Mathf.Lerp(initialColor.a, 0f, elapsedTime / duration);
-            if(spriteRenderer == null)
+            if (spriteRenderer == null)
             {
                 yield break; // Exit if the spriteRenderer is destroyed
             }

@@ -8,7 +8,7 @@ public class Globals
         ColorFromHex("#E7D562"),
         ColorFromHex("#A36ACB"),
         ColorFromHex("#3ACAD7"),
-        ColorFromHex("#A1CC50"),
+        ColorFromHex("#936A47"),
         ColorFromHex("#DE8AA3"),
         ColorFromHex("#A9284C"),
 
