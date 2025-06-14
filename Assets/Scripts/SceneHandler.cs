@@ -13,17 +13,19 @@ public class SceneHandler
 
     public List<CirclesRing> circlesRingList;
 
-    public float loopDurationSeconds = 2.8f;
+    public float loopDurationSeconds = 1f;
 
     public int currentRingIndex = 0; // Index of the currently active circles ring
-    private float rotatingAngleSpeed = 1f;
+    public float rotatingAngleSpeed = 1f;
 
     private int maxMissedCircles = 1; // Maximum number of missed circles before game over
     private int missedCirclesCount = 0; // Count of missed circles
 
     private GameObject clockPointer;
-    
+
     private bool ignorePlayerControls = false; // Flag to ignore player controls
+
+    private float speedAmplifier = 1.05f;
 
     public SceneHandler()
     {
@@ -32,9 +34,18 @@ public class SceneHandler
 
     public void LoadNextLevel()
     {
+        DestroyLevel();
         currentLevel += 1; // Increment the level
 
         if (currentLevel == 1)
+        {
+            LoadMusic1(); // Load the first music for level 2
+        }
+        else if (currentLevel == 2)
+        {
+            LoadMusic2(); // Load the second music for level 3
+        }
+        else
         {
             GlobalHandler.Instance.OnGameFinished();
         }
@@ -72,16 +83,49 @@ public class SceneHandler
         currentClockAngle = 0f; // Reset the clock angle
         currentRingIndex = 0; // Reset the current ring index
         missedCirclesCount = 0; // Reset the missed circles count
+        RestorePlayerControlls();
     }
 
     public void Reset()
     {
         DestroyLevel(); // Destroy the current level objects
-
+        speedAmplifier = 1f;
         currentLevel = 0;
     }
 
     public void LoadMusic1()
+    {
+        CreateCollisionCircleRoom(30);
+        CreateBouncingBall();
+
+        CreateClockPointer();
+        circlesRingList = new List<CirclesRing>();
+        // Clear all existing circles rings
+        foreach (CirclesRing ring in circlesRingList)
+        {
+            ring.Destroy(); // Destroy the existing circles rings
+        }
+        circlesRingList.Clear(); // Clear the list of circles rings
+
+        CirclesRing firstRing = CreateCirclesRing(2, 30, 42);
+        CirclesRing secondRing = CreateCirclesRing(2, 30, 42);
+        CirclesRing thirdRing = CreateCirclesRing(2, 30, 42);
+        CirclesRing fourthRing = CreateCirclesRing(2, 30, 42);
+        CirclesRing fifthRing = CreateCirclesRing(2, 30, 42);
+        CirclesRing sixthRing = CreateCirclesRing(2, 30, 42);
+
+        circlesRingList.Add(firstRing); // Add the circles ring to the list
+        circlesRingList.Add(secondRing);
+        circlesRingList.Add(thirdRing);
+        circlesRingList.Add(fourthRing);
+        circlesRingList.Add(fifthRing);
+        circlesRingList.Add(sixthRing);
+
+        GlobalHandler.Instance.musicHandler.LoadFirstRingMusic2(circlesRingList); // Load the first music track for the circles ring
+        loopDurationSeconds = 3.294f;
+    }
+
+    public void LoadMusic2()
     {
         // Initialize the scene handler
         CreateCollisionCircleRoom(30);
@@ -124,19 +168,24 @@ public class SceneHandler
         circlesRingList.Add(sixthRing);
 
         GlobalHandler.Instance.musicHandler.LoadFirstRingMusic1(circlesRingList); // Load the first music track for the circles ring
+        loopDurationSeconds = 2.8f;
     }
 
     public void RemovePlayerControlls()
     {
         ignorePlayerControls = true; // Set the flag to ignore player controls
-        bouncingBall.Pause();
+
+        if( bouncingBall != null)
+        {
+            bouncingBall.Pause(); // Pause the bouncing ball
+        }
     }
 
     public void RestorePlayerControlls()
     {
         ignorePlayerControls = false; // Reset the flag to allow player controls
 
-        if(bouncingBall != null)
+        if (bouncingBall != null)
         {
             bouncingBall.Resume(); // Resume the bouncing ball
         }
@@ -174,6 +223,7 @@ public class SceneHandler
             clockPointer = Object.Instantiate(prefab);
             clockPointer.transform.position = Vector3.zero; // Set the position of the clock pointer
             clockPointer.GetComponent<SpriteRenderer>().sortingOrder = 15; // Set the sorting order for rendering
+            clockPointer.SetActive(false);
         }
         else
         {
@@ -193,7 +243,7 @@ public class SceneHandler
             return;
         }
 
-        currentClockAngle += GlobalHandler.Instance.deltaTime * (360f / loopDurationSeconds ); // Increment the angle based on time
+        currentClockAngle += GlobalHandler.Instance.deltaTime * (360f / loopDurationSeconds); // Increment the angle based on time
         if (currentClockAngle >= 360f) currentClockAngle -= 360f; // Reset angle to avoid overflow
 
         bouncingBall.UpdateFrame(); // Update the bouncing ball's position
@@ -206,7 +256,7 @@ public class SceneHandler
         {
             RotateRight(); // Rotate the circles ring to the right
         }
-        
+
         foreach (CirclesRing circlesRing in circlesRingList)
         {
             circlesRing.UpdateFrame(); // Update each circles ring's rotation
@@ -215,11 +265,11 @@ public class SceneHandler
 
     public void UpdateClockPointer()
     {
-        if(clockPointer == null)
+        if (clockPointer == null)
         {
             return;
         }
-        
+
         clockPointer.transform.rotation = Quaternion.Euler(0, 0, -currentClockAngle); // Rotate the clock pointer
 
         foreach (CirclesRing circlesRing in circlesRingList)
@@ -275,15 +325,15 @@ public class SceneHandler
     {
         List<Vector3> circlePositions = new List<Vector3>();
         Color circleColor = Color.white; // Default color for circles
-        foreach (Circle circle in circlesRingList[currentRingIndex-1].circles)
+        foreach (Circle circle in circlesRingList[currentRingIndex - 1].circles)
         {
             if (circle.isSpecial)
             {
                 circlePositions.Add(circle.circleObject.transform.position); // Collect positions of special circles
-                circleColor =circle.color; // Collect colors of special circles
+                circleColor = circle.color; // Collect colors of special circles
             }
         }
-        
+
         GlobalHandler.Instance.animationHandler.InstanciatePolygonAnimation(circlePositions, circleColor, 2.2f); // Create polygon animation for special circles
 
         for (int i = 0; i < currentRingIndex; i++)
@@ -292,6 +342,9 @@ public class SceneHandler
             //circlesRingList[i].Deactivate(); // Deactivate all previous circles rings
         }
         circlesRingList[currentRingIndex].Activate(); // Activate the next circles ring
+
+        bouncingBall.velocity *= speedAmplifier; // Increase the speed of the bouncing ball
+        //rotatingAngleSpeed
     }
 
     public void onRingCircleColided(Circle circle)

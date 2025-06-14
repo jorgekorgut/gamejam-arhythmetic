@@ -15,13 +15,22 @@ public class GlobalHandler : MonoBehaviour
     public Button startButton;
     public Button exitButton;
 
+    public Button creditsButton;
+
     public GameObject SetupScreen;
     public Button nextSetupButton;
 
     public GameObject TutorialScreen;
 
+    public GameObject CreditsScreen;
+    public Button backCreditsButton;
+
     public GameObject GameOverScreen;
     public Button nextTutorialButton;
+
+    public Slider soundIntensitySlider;
+
+    public GameObject TutorialCircleRing;
 
     // Slider values
     [HideInInspector]
@@ -59,9 +68,15 @@ public class GlobalHandler : MonoBehaviour
         nextSetupButton.onClick.AddListener(OnGameNextSetup);
         nextTutorialButton.onClick.AddListener(OnGameNextTutorial);
 
+        creditsButton.onClick.AddListener(OnGameCredits);
+        backCreditsButton.onClick.AddListener(OnGameBackCredits);
+
+        soundIntensitySlider.onValueChanged.AddListener(OnSoundIntensityChanged);
+
         StartScreen.SetActive(true); // Show the start screen at the beginning
         SetupScreen.SetActive(false); // Hide the setup screen initially
         TutorialScreen.SetActive(false); // Hide the tutorial screen initially
+        CreditsScreen.SetActive(false); // Hide the credits screen initially
     }
 
     void Update()
@@ -82,14 +97,26 @@ public class GlobalHandler : MonoBehaviour
     {
         sceneHandler.UpdateFrame();
         animationHandler.UpdateFrame();
+        
+        if (Controller.Instance.IsRotateLeft())
+        {
+            TutorialLeftRotate();
+        }
+        else if (Controller.Instance.IsRotateRight())
+        {
+            TutorialRightRotate(); 
+        }
     }
 
     public void OnGameStart()
     {
+        Debug.Log("Game Started!");
         StartScreen.SetActive(false); // Hide the start screen when the game starts
         SetupScreen.SetActive(true); // Show the setup screen
         TutorialScreen.SetActive(false); // Hide the tutorial screen
-        GameOverScreen.SetActive(false); 
+        GameOverScreen.SetActive(false);
+        CreditsScreen.SetActive(false); // Hide the credits screen
+        musicHandler.PlayGameLoopMusic();
     }
 
     public void OnGameExit()
@@ -115,9 +142,7 @@ public class GlobalHandler : MonoBehaviour
 
     public void OnGameWin()
     {
-        // Handle game win logic
-        Debug.Log("Game Won!"); // Placeholder for game win logic
-                                // You can add code to show a win screen or transition to the next level here
+        Debug.Log("Game Won!");
 
         sceneHandler.RemovePlayerControlls();
         musicHandler.PlayTrack("Win_Sound", 0.5f, 4.0f);
@@ -131,22 +156,71 @@ public class GlobalHandler : MonoBehaviour
         }
     }
 
+    public void TutorialLeftRotate()
+    {
+        if (TutorialCircleRing)
+        {
+            TutorialCircleRing.transform.rotation = Quaternion.Euler(0, 0, TutorialCircleRing.transform.rotation.eulerAngles.z - 2f);
+
+            // Prevent child objects from rotating with the parent
+            for (int i = 0; i < TutorialCircleRing.transform.childCount; i++) {
+                Transform child = TutorialCircleRing.transform.GetChild(i);
+                child.rotation = Quaternion.identity;
+            }
+        }
+    }
+
+    public void TutorialRightRotate()
+    {
+        if (TutorialCircleRing)
+        {
+            TutorialCircleRing.transform.rotation = Quaternion.Euler(0, 0, TutorialCircleRing.transform.rotation.eulerAngles.z + 2f);
+
+            // Prevent child objects from rotating with the parent
+            for (int i = 0; i < TutorialCircleRing.transform.childCount; i++) {
+                Transform child = TutorialCircleRing.transform.GetChild(i);
+                child.rotation = Quaternion.identity;
+            }
+        }
+    }
+
+    public void OnGameCredits()
+    {
+        StartScreen.SetActive(false); // Hide the start screen when the game starts
+        SetupScreen.SetActive(false); // Hide the setup screen
+        TutorialScreen.SetActive(false); // Hide the tutorial screen
+        GameOverScreen.SetActive(false);
+        CreditsScreen.SetActive(true); // Show the credits screen
+    }
+
+    public void OnGameBackCredits()
+    {
+        StartScreen.SetActive(true); // Hide the start screen when the game starts
+        SetupScreen.SetActive(false); // Hide the setup screen
+        TutorialScreen.SetActive(false); // Hide the tutorial screen
+        GameOverScreen.SetActive(false);
+        CreditsScreen.SetActive(false); // Hide the credits screen
+    }
+
     public void OnGameNextSetup()
     {
         StartScreen.SetActive(false); // Hide the start screen when the game starts
         SetupScreen.SetActive(false); // Show the setup screen
         TutorialScreen.SetActive(true); // Hide the tutorial screen
-        GameOverScreen.SetActive(false); 
+        GameOverScreen.SetActive(false);
     }
 
     public void OnGameNextTutorial()
     {
         sceneHandler.RestorePlayerControlls(); // Restore player controls
-        sceneHandler.LoadMusic1();
+        sceneHandler.LoadNextLevel();
+        
         StartScreen.SetActive(false); // Hide the start screen when the game starts
         SetupScreen.SetActive(false); // Hide the setup screen
         TutorialScreen.SetActive(false); // Hide the tutorial screen
-        GameOverScreen.SetActive(false); 
+        GameOverScreen.SetActive(false);
+
+        musicHandler.StopGameLoopMusic();
     }
 
     public void OnGameFinished()
@@ -165,7 +239,12 @@ public class GlobalHandler : MonoBehaviour
 
     public void OnGameOver()
     {
-        GameOverScreen.SetActive(true); // Show the game over screen
+        GameOverScreen.SetActive(true);
         OnGameFinished();
+    }
+    
+    public void OnSoundIntensityChanged(float value)
+    {
+        musicHandler.SetVolume(value);
     }
 }

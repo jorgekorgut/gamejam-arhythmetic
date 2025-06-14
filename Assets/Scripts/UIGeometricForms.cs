@@ -20,9 +20,9 @@ public class UIGeometricForms : MonoBehaviour
         Sprite[] geometryForms = Resources.LoadAll<Sprite>("Images/trigonometric-forms");
 
         // Get the number of sprites in the room furniture sprite sheet
-        int geometryFormsCount = geometryForms.Length -1;
+        int geometryFormsCount = geometryForms.Length - 1;
 
-        List<Vector3> geometryPositions = new List<Vector3>(); // List to store furniture positions
+        //List<Vector3> geometryPositions = new List<Vector3>(); // List to store furniture positions
 
         // Get spawn area bounds
         RectTransform spawnAreaRect = spawnArea.GetComponent<RectTransform>();
@@ -32,47 +32,45 @@ public class UIGeometricForms : MonoBehaviour
         // Calculate grid dimensions
         int rows = Mathf.CeilToInt(Mathf.Sqrt(numberOfForms));
         int cols = Mathf.CeilToInt((float)numberOfForms / rows);
-        
-        float cellWidth = spawnSize.x / cols;
-        float cellHeight = spawnSize.y / rows;
 
         int formCount = 0;
         for (int row = 0; row < rows && formCount < numberOfForms; row++)
         {
             for (int col = 0; col < cols && formCount < numberOfForms; col++)
             {
-            // More random position across the entire spawn area
-            float xPos = spawnCenter.x - (spawnSize.x / 2) + Random.Range(0, spawnSize.x);
-            float yPos = spawnCenter.y - (spawnSize.y / 2) + Random.Range(0, spawnSize.y);
+                // More random position across the entire spawn area
+                float xPos = spawnCenter.x - (spawnSize.x / 2) + Random.Range(0, spawnSize.x);
+                float yPos = spawnCenter.y - (spawnSize.y / 2) + Random.Range(0, spawnSize.y);
 
-            GameObject form = new GameObject("GeometricForm" + formCount);
-            form.transform.position = new Vector3(xPos, yPos, Random.Range(-0.1f, 0.1f));
-            
-            // More variation in rotation and scale
-            form.transform.rotation = Quaternion.Euler(0, 0, Random.Range(-180f, 180f));
-            float randomSize = Random.Range(minSize * 0.8f, maxSize * 1.2f);
-            form.transform.localScale = new Vector3(
-                randomSize * Random.Range(0.8f, 1.2f),
-                randomSize * Random.Range(0.8f, 1.2f),
-                1
-            );
+                GameObject form = new GameObject("GeometricForm" + formCount);
+                form.transform.position = new Vector3(xPos , yPos , Random.Range(-0.1f, 0.1f));
 
-            SpriteRenderer renderer = form.AddComponent<SpriteRenderer>();
-            renderer.sprite = geometryForms[Random.Range(0, geometryFormsCount)];
-            renderer.sortingOrder = Random.Range(1, 3);
-            
-            form.transform.parent = spawnArea.transform;
-            geometricForms.Add(form);
-            
-            formCount++;
+                // More variation in rotation and scale
+                form.transform.rotation = Quaternion.Euler(0, 0, Random.Range(-180f, 180f));
+                float randomSize = Random.Range(minSize * 0.8f, maxSize * 1.2f);
+                form.transform.localScale = new Vector3(
+                    randomSize,
+                    randomSize,
+                    1
+                );
+
+                SpriteRenderer renderer = form.AddComponent<SpriteRenderer>();
+                renderer.sprite = geometryForms[Random.Range(0, geometryFormsCount)];
+                renderer.sortingOrder = Random.Range(-50, -54);
+
+                form.transform.parent = spawnArea.transform;
+                geometricForms.Add(form);
+
+                formCount++;
             }
         }
     }
-    
+
     void Update()
     {
         // Get spawn area bounds
         RectTransform spawnAreaRect = spawnArea.GetComponent<RectTransform>();
+        Vector3 localScale = spawnAreaRect.localScale;
 
         foreach (GameObject form in geometricForms)
         {
@@ -93,39 +91,39 @@ public class UIGeometricForms : MonoBehaviour
             // Check horizontal bounds
             if (pos.x < spawnCenter.x - halfWidth)
             {
-            pos.x = spawnCenter.x + halfWidth;
-            repositioned = true;
+                pos.x = spawnCenter.x + halfWidth;
+                repositioned = true;
             }
             else if (pos.x > spawnCenter.x + halfWidth)
             {
-            pos.x = spawnCenter.x - halfWidth;
-            repositioned = true;
+                pos.x = spawnCenter.x - halfWidth;
+                repositioned = true;
             }
 
             // Check vertical bounds
             if (pos.y < spawnCenter.y - halfHeight)
             {
-            pos.y = spawnCenter.y + halfHeight;
-            repositioned = true;
+                pos.y = spawnCenter.y + halfHeight;
+                repositioned = true;
             }
             else if (pos.y > spawnCenter.y + halfHeight)
             {
-            pos.y = spawnCenter.y - halfHeight;
-            repositioned = true;
+                pos.y = spawnCenter.y - halfHeight;
+                repositioned = true;
             }
 
             // If form was repositioned, update its position and randomize properties
             if (repositioned)
             {
-            pos.z = Random.Range(-0.1f, 0.1f);
-            form.transform.position = pos;
-            form.transform.rotation = Quaternion.Euler(0, 0, Random.Range(-180f, 180f));
-            float randomSize = Random.Range(minSize * 0.8f, maxSize * 1.2f);
-            form.transform.localScale = new Vector3(
-                randomSize ,
-                randomSize ,
-                1
-            );
+                pos.z = Random.Range(-0.1f, 0.1f);
+                form.transform.position = pos;
+                form.transform.rotation = Quaternion.Euler(0, 0, Random.Range(-180f, 180f));
+                float randomSize = Random.Range(minSize * 0.8f, maxSize * 1.2f);
+                form.transform.localScale = new Vector3(
+                    randomSize,
+                    randomSize,
+                    1
+                );
             }
         }
     }

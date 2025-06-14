@@ -5,8 +5,6 @@ public class CirclesRing
 {
     public float rotatingAngle = 0f; // Angle of rotation for the ring
 
-    private float rotatingAngleSpeed = 2f;
-
     int innerRadius; // Radius of the inner circles
     int outerRadius; // Radius of the outer circle
     public int count; // Number of circles in the ring
@@ -29,8 +27,7 @@ public class CirclesRing
     public void PointerAt(float angle)
     {
         // Calculate the index of the circle based on the angle
-
-        angle = angle - 360f / (count);
+        angle = angle - 360f / count;
 
         float clampedAngle = (angle + rotatingAngle) % 360f; // Adjust the angle based on the current rotation
 
@@ -53,15 +50,16 @@ public class CirclesRing
                 {
                     if (circle.isHit)
                     {
+                        
+
                         GlobalHandler.Instance.musicHandler.PlayTrack(circle.audioTrack1, circle.audioTrack1Volume, circle.audioTrack1Duration);
                         GlobalHandler.Instance.musicHandler.PlayTrack(circle.audioTrack2, circle.audioTrack2Volume, circle.audioTrack2Duration);
                         GlobalHandler.Instance.musicHandler.PlayTrack(circle.audioTrack3, circle.audioTrack3Volume, circle.audioTrack3Duration);
-
                     }
 
                     if (!circle.isHit && circle.isSpecial)
                     {
-                        GlobalHandler.Instance.animationHandler.InstanciateSparklingEffect(parentObject.transform, circle.circleObject.transform.position, circle.color, 1f);
+                        GlobalHandler.Instance.animationHandler.InstanciateSparklingEffect(parentObject.transform, circle.circleObject.transform.position, circle.color, 2f);
                     }
                     lastTimePlayed = Time.time; // Update the last time an audio track was played
                 }
@@ -142,13 +140,17 @@ public class CirclesRing
 
     public void RotateLeft()
     {
-        rotatingAngle -= rotatingAngleSpeed; // Decrease the angle for left rotation
+        // rotatingAngleSpeed += 0.05f; // Gradually increase rotation speed
+        // rotatingAngleSpeed = Mathf.Min(rotatingAngleSpeed, 2f); // Cap maximum speed
+        rotatingAngle -= GlobalHandler.Instance.sceneHandler.rotatingAngleSpeed; // Decrease the angle for left rotation
         if (rotatingAngle < 0f) rotatingAngle += 360f; // Wrap around if the angle goes below 0
     }
 
     public void RotateRight()
     {
-        rotatingAngle += rotatingAngleSpeed; // Increase the angle for right rotation
+        // rotatingAngleSpeed += 0.05f; // Gradually increase rotation speed
+        // rotatingAngleSpeed = Mathf.Min(rotatingAngleSpeed, 2f); // Cap maximum speed
+        rotatingAngle += GlobalHandler.Instance.sceneHandler.rotatingAngleSpeed; // Increase the angle for right rotation
         if (rotatingAngle >= 360f) rotatingAngle -= 360f; // Wrap around if the angle goes above 360
     }
     
@@ -168,9 +170,9 @@ public class CirclesRing
             if (!circle.isActive) continue;
 
             float distance = Vector3.Distance(circle.circleObject.transform.position, position);
-            if (distance <= circle.radius * 1.4f) 
+            if (distance <= circle.radius * 1.6f) 
             {
-            sortedCollisions.Add((distance - circle.radius, circle));
+                sortedCollisions.Add((distance - circle.radius, circle));
             }
         }
 
